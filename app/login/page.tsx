@@ -8,18 +8,39 @@ export default function LoginPage() {
  
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  const [loading, setLoading] = useState(false);
 
-
-  const handleSignup = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setError("");
+    setSuccess("");
+    setLoading(true);
 
-   
-
-    console.log({
- 
-      email,
-      password,
-    });
+    try {
+      const response = await fetch("/api/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email,
+          password,
+        }),
+      });
+      const data = await response.json();
+      if (!response.ok || !data.success) {
+        setError(data.message || "Invalid credentials");
+      } else {
+        setSuccess(`Welcome back, ${data.user?.name || "user"}!`);
+      }
+    } catch (err) {
+      console.error(err);
+      setError("Failed to connect to the server. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -75,10 +96,17 @@ export default function LoginPage() {
   </div>
           
 
-          <form onSubmit={handleSignup} className="space-y-5">
-
-            
-            
+          <form onSubmit={handleLogin} className="space-y-5">
+            {error && (
+              <div className="p-3 bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg">
+                {error}
+              </div>
+            )}
+            {success && (
+              <div className="p-3 bg-green-50 border border-green-200 text-green-700 text-sm rounded-lg">
+                {success}
+              </div>
+            )}
 
             {/* Email */}
             <div>
@@ -104,7 +132,7 @@ export default function LoginPage() {
 
               <input
                 type="password"
-                placeholder="Create a password"
+                placeholder="Enter your password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full px-4 py-3 bg-white border border-slate-700 rounded-lg outline-none focus:border-blue-500"
@@ -112,21 +140,27 @@ export default function LoginPage() {
               />
             </div>
 
-            
-
             {/* Button */}
             <button
               type="submit"
-              className="w-full py-3 bg-blue-600 hover:bg-blue-700 rounded-lg font-semibold transition"
+              disabled={loading}
+              className="w-full py-3 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white rounded-lg font-semibold transition"
             >
-              Login
+              {loading ? "Logging in..." : "Login"}
             </button>
 
           </form>
 
-          {/* Login */}
-          
-         
+          {/* Register Link */}
+          <p className="text-center text-slate-400 mt-6">
+            Don't have an account?{" "}
+            <Link
+              href="/register"
+              className="text-blue-500 hover:text-blue-400 font-medium"
+            >
+              Sign up
+            </Link>
+          </p>
 
         </div>
 

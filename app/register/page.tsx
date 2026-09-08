@@ -9,20 +9,55 @@ export default function SignupPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleSignup = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSignup = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setError("");
+    setSuccess("");
 
-    if (password !== confirmPassword) {
-      alert("Passwords do not match");
+    if (password !== confirmPassword && confirmPassword) {
+      setError("Passwords do not match");
       return;
     }
 
-    console.log({
-      name,
-      email,
-      password,
-    });
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters long");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const response = await fetch("/api/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name,
+          email,
+          password,
+        }),
+      });
+      const data = await response.json();
+      if (!response.ok || !data.success) {
+        setError(data.message || "Registration failed");
+      } else {
+        setSuccess("Registration successful! You can now log in.");
+        setName("");
+        setEmail("");
+        setPassword("");
+        setConfirmPassword("");
+      }
+    } catch (err) {
+      console.error(err);
+      setError("Failed to connect to the server. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -79,8 +114,17 @@ export default function SignupPage() {
           
 
           <form onSubmit={handleSignup} className="space-y-5">
+            {error && (
+              <div className="p-3 bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg">
+                {error}
+              </div>
+            )}
+            {success && (
+              <div className="p-3 bg-green-50 border border-green-200 text-green-700 text-sm rounded-lg">
+                {success}
+              </div>
+            )}
 
-            
             <div>
               <label className="block text-sm font-medium mb-2">
                 Full Name
@@ -120,7 +164,7 @@ export default function SignupPage() {
 
               <input
                 type="password"
-                placeholder="Create a password"
+                placeholder="Create a password (min 6 characters)"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full px-4 py-3 bg-white border border-slate-700 rounded-lg outline-none focus:border-blue-500"
@@ -128,14 +172,13 @@ export default function SignupPage() {
               />
             </div>
 
-            
-
             {/* Button */}
             <button
               type="submit"
-              className="w-full py-3 bg-blue-600 hover:bg-blue-700 rounded-lg font-semibold transition"
+              disabled={loading}
+              className="w-full py-3 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white rounded-lg font-semibold transition"
             >
-              Create Account
+              {loading ? "Creating Account..." : "Create Account"}
             </button>
 
           </form>
