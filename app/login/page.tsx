@@ -3,9 +3,10 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from 'next/image';
+import {useRouter} from "next/navigation"
 
 export default function LoginPage() {
- 
+ const router =useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -34,6 +35,12 @@ export default function LoginPage() {
         setError(data.message || "Invalid credentials");
       } else {
         setSuccess(`Welcome back, ${data.user?.name || "user"}!`);
+        localStorage.setItem("isLoggedIn", "true");
+        if (data.user) {
+          localStorage.setItem("user", JSON.stringify(data.user));
+        }
+        window.dispatchEvent(new Event("login"));
+        router.push("/");
       }
     } catch (err) {
       console.error(err);
@@ -144,7 +151,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white rounded-lg font-semibold transition"
+              className="w-full py-3 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white rounded-lg font-semibold transition cursor-pointer"
             >
               {loading ? "Logging in..." : "Login"}
             </button>
@@ -153,7 +160,7 @@ export default function LoginPage() {
 
           {/* Register Link */}
           <p className="text-center text-slate-400 mt-6">
-            Don't have an account?{" "}
+            Don&apos;t have an account?{" "}
             <Link
               href="/register"
               className="text-blue-500 hover:text-blue-400 font-medium"
