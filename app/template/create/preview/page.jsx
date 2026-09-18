@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 
-export default function PreviewPage() {
+function PreviewContent() {
   const searchParams = useSearchParams();
 
   const template = searchParams.get("template") || "classic";
@@ -60,6 +60,14 @@ export default function PreviewPage() {
       </div>
 
     </main>
+  );
+}
+
+export default function PreviewPage() {
+  return (
+    <Suspense fallback={<div className="flex min-h-screen items-center justify-center">Loading...</div>}>
+      <PreviewContent />
+    </Suspense>
   );
 }
 

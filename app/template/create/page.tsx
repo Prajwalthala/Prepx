@@ -1,9 +1,9 @@
 "use client";
 import Navbar from "../../components/Navbar";
-import { FormEvent, useState } from "react";
+import { FormEvent, useState, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 
-export default function CreateResumePage() {
+function CreateResumeForm() {
 
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -681,6 +681,14 @@ export default function CreateResumePage() {
       </div>
 
     </main>
+  );
+}
+
+export default function CreateResumePage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#f7f6fc] flex items-center justify-center text-gray-500">Loading...</div>}>
+      <CreateResumeForm />
+    </Suspense>
   );
 }
 
